@@ -1,0 +1,41 @@
+﻿services:
+  battle.redis:
+    image: redis/redis-stack:latest
+    container_name: battle.redis
+    ports:
+      - "47379:6379"
+      - "47001:8001"
+    volumes:
+      - redis_data:/data
+    restart: always
+    networks:
+      - local_network
+
+  battle.keycloak:
+    image: keycloak/keycloak:26.2
+    container_name: battle.keycloak
+    ports:
+      - "49090:49090"
+      - "49443:49443"
+    environment:
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 49090
+      KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: "true"
+      KC_LOG_LEVEL: info
+    command: [ "start-dev", "--http-port", "49090", "--https-port", "49443", "--import-realm", "--verbose" ]
+    volumes:
+      - ./battle-realm.json:/opt/keycloak/data/import/battle-realm.json
+      - keycloak_data:/opt/keycloak/data
+    networks:
+      - local_network
+    
+networks:
+  local_network:
+    driver: bridge
+    
+volumes:
+  redis_data:
+  keycloak_data:

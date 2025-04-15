@@ -1,0 +1,63 @@
+﻿services:
+  battle.api:
+    image: battle-api:latest
+    container_name: battle.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=https://+:8081;http://+:8080
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=<<password>>
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+    volumes:
+      - ~/.aspnet/https:/https:ro
+    build:
+      context: ../src/Battle.API
+      dockerfile: Dockerfile
+    ports:
+      - "48080:8080"
+      - "48081:8081"
+      - "49090:49090" # Keycloak
+      - "49443:49443" # Keycloak
+    networks:
+      - local_network
+    depends_on:
+      - battle.redis
+    restart: on-failure:10
+    
+  battle.redis:
+    image: redis/redis-stack:latest
+    container_name: battle.redis
+    ports:
+      - "47379:6379"
+      - "47001:8001"
+    volumes:
+      - redis_data:/data
+    restart: always
+    networks:
+      - local_network
+
+  battle.keycloak:
+    image: keycloak/keycloak:26.2
+    container_name: battle.keycloak
+    environment:
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 49090
+      KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: "true"
+      KC_LOG_LEVEL: info
+    command: [ "start-dev", "--http-port", "49090", "--https-port", "49443", "--import-realm", "--verbose" ]
+    volumes:
+      - ./battle-realm.json:/opt/keycloak/data/import/battle-realm.json
+      - keycloak_data:/opt/keycloak/data
+    depends_on:
+      - battle.api # It should be the other way around, but this is a "local" fix to have Keycloak and the main API in the same network.
+    network_mode: container:battle.api
+    
+networks:
+  local_network:
+    driver: bridge
+    
+volumes:
+  redis_data:
+  keycloak_data:

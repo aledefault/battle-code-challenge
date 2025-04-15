@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option csharp_namespace = "Battle.Cli";
+
+package battle.api.v1;
+
+service Leaderboard {
+  rpc GetAll (LeaderboardRequest) returns (LeaderboardResponse);
+}
+
+message LeaderboardRequest {
+}
+
+message LeaderboardResponse {
+  repeated LeaderboardItem entries = 1;
+}
+
+message LeaderboardItem {
+  string user_id = 1;
+  string username = 2;
+  int32 position = 3;
+  int64 score = 4;
+}

@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option csharp_namespace = "Battle.API";
+
+package battle.api.v1;
+
+service Player {
+  rpc Create (NewPlayerRequest) returns (NewPlayerResponse);
+}
+
+message NewPlayerRequest {
+  string username = 1;
+  string email = 2;
+  string password = 3;
+  string description = 4;
+  int32 attack = 5;
+  int32 defense = 6;
+}
+
+message NewPlayerResponse {
+  string id = 1;
+  string username = 2;
+  string description = 3;
+  int32 gold = 4;
+  int32 silver = 5;
+  int32 attack = 6;
+  int32 defense = 7;
+  int32 hit_points = 8;
+}

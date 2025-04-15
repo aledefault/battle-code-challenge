@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option csharp_namespace = "Battle.API";
+
+package battle.api.v1;
+
+service Battle {
+  rpc Submit (BattleRequest) returns (stream BattleResponse);
+}
+
+message BattleRequest {
+  string opponent_id = 1;
+}
+
+message BattleResponse {
+  string username = 1;
+  int32 damage = 2;
+  int32 misses = 3;
+  string outcome = 4;
+  BattleResources resources_gain = 5;
+  BattleResources resources_lost = 6;
+}
+
+message BattleResources {
+  int32 gold = 1;
+  int32 silver = 2;
+}
